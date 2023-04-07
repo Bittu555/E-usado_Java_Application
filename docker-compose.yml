@@ -1,0 +1,208 @@
+version: "2"
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongo
+    hostname: localhost
+    ports:
+      - 27017:27017
+
+  mysql:
+    image: mysql:latest
+    container_name: mysql-container
+    restart: always
+    hostname: localhost
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: 'mypass123'
+      MYSQL_USERNAME: 'root'
+    #      MYSQL_PASSWORD: root
+    #      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+
+  rabbitmq:
+    image: rabbitmq:3.7.5-management
+    container_name: rabbitmq
+    hostname: localhost
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_VHOST:
+    ports:
+      - 5672:5672
+      - 15672:15672
+
+  eureka-server:
+    build: ./eureka-server
+    container_name: eureka-server
+    restart: always
+    hostname: localhost
+    ports:
+      - 8761:8761
+
+  api-gateway:
+    container_name: api-gateway
+    build: ./api-gateway
+    hostname: localhost
+    ports:
+      - 8080:8080
+    depends_on:
+      - config-server
+      - eureka-server
+    restart: always
+
+  config-server:
+    container_name: config-server
+    build: ./config-server
+    hostname: localhost
+    restart: always
+    depends_on:
+      - eureka-server
+    ports:
+      - 8888:8888
+
+  user-service:
+    container_name: user-service
+    build: ./user-service
+    hostname: localhost
+    ports:
+      - 8091:8091
+    depends_on:
+      - mongodb
+#      - config-server
+      - eureka-server
+#      - api-gateway
+#      - rabbitmq
+    restart: always
+
+  authentication-service:
+    container_name: authentication-service
+    build: ./authentication-service
+    hostname: localhost
+    ports:
+      - 8081:8081
+    depends_on:
+      - mysql
+      - eureka-server
+      - config-server
+      - rabbitmq
+      - api-gateway
+    restart: always
+
+  product-service:
+    container_name: product-service
+    build: ./product-service
+    hostname: localhost
+    ports:
+      - 8089:8089
+    depends_on:
+      - mongodb
+      - eureka-server
+#      - rabbitmq
+      - config-server
+      - api-gateway
+    restart: always
+
+  slot-service:
+    container_name: slot-service
+    build: ./slot-service
+    hostname: localhost
+    ports:
+      - 8090:8090
+    depends_on:
+      - mongodb
+      - eureka-server
+      - rabbitmq
+      - config-server
+      - api-gateway
+    restart: always
+
+  order-service:
+    container_name: order-service
+    build: ./order-service
+    hostname: localhost
+    ports:
+      - 8087:8087
+    depends_on:
+      - mongodb
+      - eureka-server
+      - rabbitmq
+      - config-server
+      - api-gateway
+    restart: always
+
+  payment-service:
+    container_name: payment-service
+    build: ./payment-service
+    hostname: localhost
+    ports:
+      - 8088:8088
+    depends_on:
+      - eureka-server
+      - config-server
+      - mongodb
+      - api-gateway
+    restart: always
+
+  email-service:
+    container_name: email-service
+    build: ./email-service
+    hostname: localhost
+    ports:
+      - 8085:8085
+    depends_on:
+      - eureka-server
+      - rabbitmq
+      - config-server
+      - api-gateway
+    restart: always
+
+  chat-service:
+    container_name: chat-service
+    build: ./chat-service
+    hostname: localhost
+    ports:
+      - 8083:8083
+    depends_on:
+      - eureka-server
+      - rabbitmq
+      - config-server
+      - api-gateway
+      - mongodb
+    restart: always
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - eureka-server
+      - config-server
+      - api-gateway
+      - user-service
+      - authentication-service
+      - product-service
+      - slot-service
+      - order-service
+      - email-service
+      - chat-service
+      - payment-service
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    links:
+      - prometheus:prometheus
+    volumes:
+      - ./grafana:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=password
