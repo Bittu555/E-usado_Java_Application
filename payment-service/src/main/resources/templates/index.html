@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Accept a card payment</title>
+    <meta name="description" content="A demo of a card payment on Stripe" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="global.css" />
+    <script src="client.js" defer></script>
+</head>
+
+<body>
+<!-- Display a payment form -->
+<div class="container">
+    <div class="form-card">
+        <form id="payment-form" th:action="@{/checkout}" th:object="${checkoutForm}" method="post">
+            <p><b>Payment details for a product</b></p>
+            <div class="form-control">
+                <input type="text" th:field="*{senderEmail}" placeholder="Sender Email address" required />
+            </div>
+            <div class="form-control">
+                <input type="text" th:field="*{amount}" placeholder="Amount" required />
+            </div>
+            <div class="form-control">
+                <input type="text" th:field="*{paymentDescription}" placeholder="Payment Description" required />
+            </div>
+            <div class="form-control">
+                <input type="text" th:field="*{senderName}" placeholder="Sender Name" required />
+            </div>
+            <div class="form-control">
+                <input type="text" th:field="*{receiverEmail}" placeholder="Receiver Email" required />
+            </div>
+            <div class="form-control">
+                <input type="text" th:field="*{receiverName}" placeholder="Receiver Name" required />
+            </div>
+            <div class="form-control">
+                <input type="text" th:field="*{country}" placeholder="Country" required />
+            </div>
+            <div class="form-control">
+                <input type="text" th:field="*{state}" placeholder="State" required />
+            </div>
+            <div class="form-control">
+                <input type="text" th:field="*{city}" placeholder="City" required />
+            </div>
+            <div class="form-control">
+                <input type="text" th:field="*{zipCode}" placeholder="Zipcode" required />
+            </div>
+            <div class="form-control">
+                <input type="text" th:field="*{line1}" placeholder="Line 1" required />
+            </div>
+            <p><input type="submit" class="btn btn-primary"></p>
+        </form>
+
+    </div>
+
+</div>
+</body>
+</html>
